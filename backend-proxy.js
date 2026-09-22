@@ -12,7 +12,6 @@ import { checkRateLimit } from './src/proxy/rateLimiter.js';
 import { verifyJWT } from './src/proxy/auth.js';
 import { getSupabaseProfile, incrementSupabaseUsage, updateSupabaseProfilePlan } from './src/proxy/supabase.js';
 import { verifyLemonSqueezySignature, verifyPaddleSignature, isPaddleIpAllowed } from './src/proxy/webhooks.js';
-import { INDEX_HTML, TERMS_HTML, PRIVACY_HTML, REFUND_HTML, SUCCESS_HTML } from './src/proxy/landingPages.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -124,40 +123,27 @@ export default {
       });
     }
 
-    // Public Compliance & Pricing Landing Pages for Paddle Verification
+    // Public Compliance & Pricing Landing Pages — Redirect to canonical site
     if (request.method === "GET" || request.method === "HEAD") {
-      const htmlHeaders = {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=3600",
-        ...corsHeaders
-      };
-
-      const sendPage = (content) => {
-        return new Response(request.method === "HEAD" ? null : content, { headers: htmlHeaders });
-      };
-
       const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "").replace(/\.html$/, "") || "/";
 
       if (cleanPath === "/" || cleanPath === "/index" || cleanPath === "/pricing") {
-        return sendPage(INDEX_HTML);
+        return Response.redirect("https://filli-ai.pages.dev/", 301);
       }
       if (cleanPath === "/terms" || cleanPath === "/terms-of-service") {
-        return sendPage(TERMS_HTML);
+        return Response.redirect("https://filli-ai.pages.dev/terms.html", 301);
       }
       if (cleanPath === "/privacy" || cleanPath === "/privacy-policy") {
-        return sendPage(PRIVACY_HTML);
+        return Response.redirect("https://filli-ai.pages.dev/privacy.html", 301);
       }
       if (cleanPath === "/refund" || cleanPath === "/refund-policy" || cleanPath === "/refunds") {
-        return sendPage(REFUND_HTML);
+        return Response.redirect("https://filli-ai.pages.dev/refund.html", 301);
       }
       if (cleanPath === "/success" || cleanPath === "/order-complete") {
-        return sendPage(SUCCESS_HTML);
+        return Response.redirect("https://filli-ai.pages.dev/success.html", 301);
       }
       if (cleanPath === "/favicon.ico" || cleanPath === "/favicon.svg") {
-        return new Response(
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚡</text></svg>',
-          { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=86400", ...corsHeaders } }
-        );
+        return Response.redirect("https://filli-ai.pages.dev/favicon.svg", 301);
       }
     }
 
